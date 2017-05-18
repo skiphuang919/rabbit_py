@@ -63,7 +63,27 @@ class Producer(object):
         print(" [x] Sent %r" % message)
         self.connection.close()
 
+    def p3(self):
+        """
+        publish msg to multi subscriber
+        """
+
+        # creates an 'fanout' type exchange named 'logs' if it does not already exist
+        # if the exchange exists, verifies that it is of the correct and expected
+        # 'fanout' type exchange broadcast all the msg it receive to all the queue it knows
+        self.channel.exchange_declare(exchange='logs',
+                                      exchange_type='fanout')
+
+        message = "Hello World! tag={}".format(random.randint(0, 100))
+
+        # publish msg to the named exchange 'logs'
+        self.channel.basic_publish(exchange='logs',
+                                   routing_key='',
+                                   body=message)
+        print(" [x] Sent %r" % message)
+        self.connection.close()
+
 
 if __name__ == '__main__':
     s = Producer()
-    s.p2()
+    s.p3()

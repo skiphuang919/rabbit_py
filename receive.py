@@ -58,6 +58,9 @@ class Consumer(object):
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def c2(self):
+        """
+        receive msg in Round-robin mode
+        """
         # declare a 'task_queue' queue, create if need
         # `durable=True` make sure that RabbitMQ will never lose the queue even if RabbitMQ restarts
         self.channel.queue_declare(queue='task_queue', durable=True)
@@ -76,7 +79,35 @@ class Consumer(object):
         # start the loop
         self.channel.start_consuming()
 
+    @staticmethod
+    def c3_callback(ch, method, properties, body):
+        print(" [x] %r" % body)
+
+    def c3(self):
+        """
+        subscribe msg from publisher
+        """
+
+        # declare an fanout exchange, create if need
+        self.channel.exchange_declare(exchange='logs',
+                                      exchange_type='fanout')
+
+        # create a queue with a random name chosen by server
+        # `exclusive=True` means delete the queue once we disconnect the consumer
+        result = self.channel.queue_declare(exclusive=True)
+        queue_name = result.method.queue
+
+        # bind the queue and exchange
+        self.channel.queue_bind(exchange='logs',
+                                queue=queue_name)
+
+        print(' [*] Waiting for logs. To exit press CTRL+C')
+        self.channel.basic_consume(self.c3_callback,
+                                   queue=queue_name,
+                                   no_ack=True)
+
+        self.channel.start_consuming()
 
 if __name__ == '__main__':
     c = Consumer()
-    c.c2()
+    c.c3()
