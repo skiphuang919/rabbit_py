@@ -2,6 +2,7 @@
 import pika
 import time
 import random
+import sys
 
 
 class Consumer(object):
@@ -108,6 +109,40 @@ class Consumer(object):
 
         self.channel.start_consuming()
 
+    @staticmethod
+    def c4_callback(ch, method, properties, body):
+        print(" [x] %r:%r" % (method.routing_key, body))
+
+    def c4(self):
+        """
+        subscribe the filtered msg
+        """
+
+        # declare an direct exchange, create if need
+        self.channel.exchange_declare(exchange='direct_logs',
+                                      exchange_type='direct')
+
+        result = self.channel.queue_declare(exclusive=True)
+        queue_name = result.method.queue
+
+        severities = sys.argv[1:]
+        if not severities:
+            sys.stderr.write("Usage: %s [info] [debug] [warning] [error]\n" % sys.argv[0])
+            sys.exit(1)
+
+        # create a new binding for each severity
+        for severity in severities:
+            self.channel.queue_bind(exchange='direct_logs',
+                                    queue=queue_name,
+                                    routing_key=severity)
+
+        print(' [*] Waiting for {} logs. To exit press CTRL+C'.format(','.join(severities)))
+
+        self.channel.basic_consume(self.c4_callback,
+                                   queue=queue_name,
+                                   no_ack=True)
+        self.channel.start_consuming()
+
 if __name__ == '__main__':
     c = Consumer()
-    c.c3()
+    c.c4()

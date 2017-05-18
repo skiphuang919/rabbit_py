@@ -83,7 +83,26 @@ class Producer(object):
         print(" [x] Sent %r" % message)
         self.connection.close()
 
+    def p4(self):
+        """
+        distribute msg through exchange routing_key
+        """
+        # declare an direct exchange, create if need
+        self.channel.exchange_declare(exchange='direct_logs',
+                                      exchange_type='direct')
+
+        severity = random.choice(['debug', 'info', 'error', 'warning'])
+        message = "<{}> Hello World! tag={}".format(severity, random.randint(0, 100))
+
+        # publish msg to the named exchange 'direct_logs'
+        # bind the severity to the routing_key
+        self.channel.basic_publish(exchange='direct_logs',
+                                   routing_key=severity,
+                                   body=message)
+        print(" [x] Sent %r" % message)
+        self.connection.close()
+
 
 if __name__ == '__main__':
     s = Producer()
-    s.p3()
+    s.p4()
