@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pika
+import random
 
 
 class Producer(object):
@@ -18,6 +19,10 @@ class Producer(object):
         self.channel = self.connection.channel()
 
     def p1(self):
+        """
+        simply send messages to a named queue producer.
+        """
+
         # declare a 'hello' queue, create if needed
         self.channel.queue_declare(queue='hello')
 
@@ -34,7 +39,31 @@ class Producer(object):
         # disconnect from rabbit
         self.connection.close()
 
+    def p2(self):
+        """
+        distribute time-consuming tasks among multiple workers.
+        """
+        # declare a 'task_queue' queue, create if need
+        # `durable=True` make sure that RabbitMQ will never lose the queue even if RabbitMQ restarts
+        self.channel.queue_declare(queue='task_queue', durable=True)
+
+        # generate msg with random int between 0 to 100
+        message = "Hello World! tag={}".format(random.randint(0, 100))
+
+        # publish msg to the channel with the default exchange
+        # mark msg as persistent by supplying a `delivery_mode` property with a value 2.
+        # Rabbit doesn't do `fsync(2)` for every message
+        # it may be just saved to cache and not really written to the disk
+        # although it tells RabbitMQ to save the message to disk
+        self.channel.basic_publish(exchange='',
+                                   routing_key='task_queue',
+                                   body=message,
+                                   properties=pika.BasicProperties(delivery_mode=2,)  # make message persistent
+                                   )
+        print(" [x] Sent %r" % message)
+        self.connection.close()
+
 
 if __name__ == '__main__':
     s = Producer()
-    s.p1()
+    s.p2()
