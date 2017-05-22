@@ -48,7 +48,7 @@ class RpcClient(object):
 
     def request(self):
         n = int(sys.argv[1])
-        print(" [x] Requesting fib(30)")
+        print(" [x] Requesting fib({})".format(n))
         response = self.call(n)
         print(" [.] Got %r" % response)
 
