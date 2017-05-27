@@ -14,7 +14,7 @@ class Consumer(object):
         self.connection = pika.BlockingConnection(self.con_obj)
 
         # create a new channel
-        # that is to say create a new connection
+        # we can treat a channel as a light connection which sharing the same one TCP connection
         self.channel = self.connection.channel()
 
     @staticmethod
