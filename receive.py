@@ -7,14 +7,48 @@ import sys
 
 class Consumer(object):
     def __init__(self):
-        # create a localhost connection obj that is pass to connection adapter
+        """
+        When an AMQP 0-9-1 client connects to RabbitMQ, it specifies a vhost name to connect to.
+        If authentication succeeds and the username provided was granted permissions to the vhost,
+        connection is established.
+
+        Authentication:
+            The three built-in authenticatio nmechanisms:
+            `PLAIN`: enabled by default in the RabbitMQ server and clients, and is the default for most other clients.
+            `AMQPLAIN`
+            `RABBIT-CR-DEMO`
+
+        Virtual hosts:
+            it provide logical grouping and separation of resources.
+            Connections to a vhost can only operate on exchanges, queues, bindings, and so on in that vhost.
+
+            When the server first starts running, and detects that its database is uninitialised or has been deleted,
+            it initialises a fresh database with the following resources:
+                a virtual host named `/`
+                a user named `guest` with a default password of `guest`, granted full access to the `/` virtual host.
+
+        Authorisation:
+            When a RabbitMQ client establishes a connection to a server,
+            it specifies a virtual host within which it intends to operate.
+            A first level of access control is checking whether the user has any permissions to access the virtual hosts,
+            and rejecting the connection attempt otherwise.
+
+            Permissions are expressed as a triple of regular expressions
+            - one each for configure, write and read - on per-vhost basis
+
+        channel:
+            we can treat a channel as a light connection which sharing the same one TCP connection
+            Communication on a particular channel is completely separate from communication on another channel
+            it is very common to open a new channel per thread/process and not share channels between them
+            it has a channel number to distinguish for each other
+        """
+        # create a ConnectionParameters obj that is pass to connection adapter
         self.con_obj = pika.ConnectionParameters(host='localhost')
 
         # create a instance of connection object
         self.connection = pika.BlockingConnection(self.con_obj)
 
         # create a new channel
-        # we can treat a channel as a light connection which sharing the same one TCP connection
         self.channel = self.connection.channel()
 
     @staticmethod
@@ -95,6 +129,7 @@ class Consumer(object):
 
         # create a queue with a random name chosen by server
         # `exclusive=True` means delete the queue once we disconnect the consumer
+
         result = self.channel.queue_declare(exclusive=True)
         queue_name = result.method.queue
 
