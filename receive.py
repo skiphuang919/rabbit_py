@@ -13,7 +13,7 @@ class Consumer(object):
         connection is established.
 
         Authentication:
-            The three built-in authenticatio nmechanisms:
+            The three built-in authentication mechanism:
             `PLAIN`: enabled by default in the RabbitMQ server and clients, and is the default for most other clients.
             `AMQPLAIN`
             `RABBIT-CR-DEMO`
@@ -128,7 +128,7 @@ class Consumer(object):
                                       exchange_type='fanout')
 
         # create a queue with a random name chosen by server
-        # `exclusive=True` means delete the queue once we disconnect the consumer
+        # `exclusive=True` means used by only one connection and the queue will be deleted when that connection closes
 
         result = self.channel.queue_declare(exclusive=True)
         queue_name = result.method.queue

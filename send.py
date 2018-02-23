@@ -14,7 +14,7 @@ class Producer(object):
         connection is established.
 
         Authentication:
-            The three built-in authenticatio nmechanisms:
+            The three built-in authentication mechanism:
             `PLAIN`: enabled by default in the RabbitMQ server and clients, and is the default for most other clients.
             `AMQPLAIN`
             `RABBIT-CR-DEMO`
@@ -102,7 +102,7 @@ class Producer(object):
         publish msg to multi subscriber
         """
 
-        # creates an 'fanout' type exchange named 'logs' if it does not already exist
+        # create an 'fanout' type exchange named 'logs' if it does not already exist
         # if the exchange exists, verifies that it is of the correct and expected
         # 'fanout' type exchange broadcast all the msg it receive to all the queue it knows
         self.channel.exchange_declare(exchange='logs',
@@ -111,6 +111,8 @@ class Producer(object):
         message = "Hello World! tag={}".format(random.randint(0, 100))
 
         # publish msg to the named exchange 'logs'
+        # fanout exchange routes messages to all of the queues that are bound to it
+        # and the routing key is ignored.
         self.channel.basic_publish(exchange='logs',
                                    routing_key='',
                                    body=message)

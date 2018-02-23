@@ -41,9 +41,10 @@ class RpcClient(object):
                                                                    correlation_id=self.corr_id,),
                                    body=str(n))
 
-        # wait until the proper response arrives
+        # block here wait until the proper response arrives
         while self.response is None:
             self.connection.process_data_events()
+
         return self.response
 
     def request(self):
